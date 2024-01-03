@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
-import { AnswerRepository } from '../../src/domain/repositories/answers-repository'
+import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository'
 
-export const fakeAnswerRepository: AnswerRepository = {
+export const fakeAnswersRepository: AnswersRepository = {
   create: vi.fn(),
 }
