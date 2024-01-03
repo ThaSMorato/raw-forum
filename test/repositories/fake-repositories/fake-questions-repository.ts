@@ -3,4 +3,5 @@ import { vi } from 'vitest'
 
 export const fakeQuestionsRepository: QuestionsRepository = {
   create: vi.fn(),
+  findBySlug: vi.fn(),
 }
