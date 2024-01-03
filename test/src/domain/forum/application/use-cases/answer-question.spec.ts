@@ -1,4 +1,4 @@
-import { fakeAnswersRepository } from '$/repositories/fake-repositories/fake-answer-repository'
+import { fakeAnswersRepository } from '$/repositories/fake-repositories/fake-answers-repository'
 import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
 import { AnswerQuestionUseCase } from '@/domain/forum/application/use-cases/answer-question'
 
