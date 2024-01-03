@@ -1,5 +1,8 @@
 import { makeQuestion } from '$/factories/make-question'
-import { fakeQuestionsRepository } from '$/repositories/fake-repositories/fake-questions-repository'
+import {
+  fakeQuestionsRepository,
+  functions,
+} from '$/repositories/fake-repositories/fake-questions-repository'
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
 import { GetQuestionBySlugUseCase } from '@/domain/forum/application/use-cases/get-question-by-slug'
 import { Slug } from '@/domain/forum/enterprise/entities/value-objects/slug'
@@ -11,13 +14,6 @@ const newQuestion = makeQuestion({
   slug: Slug.create('a-test-slug'),
 })
 
-const mockFindBySlug = vi.fn()
-
-const mockedRepository = {
-  ...fakeQuestionsRepository,
-  findBySlug: mockFindBySlug,
-}
-
 describe('Get Question By Slug Use Case', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -25,10 +21,10 @@ describe('Get Question By Slug Use Case', () => {
 
   describe('Unity tests', () => {
     beforeEach(() => {
-      sut = new GetQuestionBySlugUseCase(mockedRepository)
+      sut = new GetQuestionBySlugUseCase(fakeQuestionsRepository)
     })
     it('should be able to find a question by slug', async () => {
-      mockFindBySlug.mockResolvedValue(newQuestion)
+      functions.findBySlug.mockResolvedValue(newQuestion)
 
       const { question } = await sut.execute({
         slug: 'a-test-slug',
@@ -42,10 +38,10 @@ describe('Get Question By Slug Use Case', () => {
       expect(question.content).toEqual(newQuestion.content)
       expect(question.id.toValue()).toEqual(newQuestion.id.toValue())
 
-      expect(mockFindBySlug).toBeCalled()
+      expect(functions.findBySlug).toBeCalled()
     })
     it('should throw if receives a not valid question slug', async () => {
-      mockFindBySlug.mockResolvedValue(null)
+      functions.findBySlug.mockResolvedValue(null)
 
       try {
         await sut.execute({
