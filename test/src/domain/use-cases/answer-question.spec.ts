@@ -8,7 +8,7 @@ it('should create an answer', async () => {
   const answer = await answerQuestion.execute({content:'Nova Resposta', instructorId: '1', questionId: '1'})
 
   expect(answer.content).toEqual('Nova Resposta')
-  expect(answer.authorId).toEqual('1')
-  expect(answer.questionId).toEqual('1')
+  expect(answer.authorId.toValue()).toEqual('1')
+  expect(answer.questionId.toValue()).toEqual('1')
   expect(fakeAnswerRepository.create).toBeCalled()
 })
