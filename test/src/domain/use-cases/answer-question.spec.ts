@@ -1,6 +1,6 @@
-import {expect, it, vi} from 'vitest'
-import { AnswerQuestionUseCase } from '../../../../src/domain/use-cases/answer-question'
-import { fakeAnswerRepository } from '../../../fakeRepositories/fake-answer-repository'
+import { fakeAnswerRepository } from '$/fakeRepositories/fake-answer-repository'
+import { AnswerQuestionUseCase } from '@/domain/use-cases/answer-question'
+import {expect, it} from 'vitest'
 
 it('should create an answer', async () => {
   const answerQuestion = new AnswerQuestionUseCase(fakeAnswerRepository)
