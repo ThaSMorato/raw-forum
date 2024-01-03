@@ -23,6 +23,5 @@ export class Slug {
       .replace(/-$/, '')
 
     return new Slug(slugText)
-
   }
 }

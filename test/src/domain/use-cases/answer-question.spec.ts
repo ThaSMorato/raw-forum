@@ -1,11 +1,15 @@
 import { fakeAnswerRepository } from '$/fakeRepositories/fake-answer-repository'
 import { AnswerQuestionUseCase } from '@/domain/use-cases/answer-question'
-import {expect, it} from 'vitest'
+import { expect, it } from 'vitest'
 
 it('should create an answer', async () => {
   const answerQuestion = new AnswerQuestionUseCase(fakeAnswerRepository)
 
-  const answer = await answerQuestion.execute({content:'Nova Resposta', instructorId: '1', questionId: '1'})
+  const answer = await answerQuestion.execute({
+    content: 'Nova Resposta',
+    instructorId: '1',
+    questionId: '1',
+  })
 
   expect(answer.content).toEqual('Nova Resposta')
   expect(answer.authorId.toValue()).toEqual('1')
