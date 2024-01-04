@@ -4,15 +4,13 @@ import { AnswersRepository } from '@/domain/forum/application/repositories/answe
 const create = vi.fn()
 const _delete = vi.fn()
 const findById = vi.fn()
-
-export const fakeAnswersRepository: AnswersRepository = {
-  create,
-  delete: _delete,
-  findById,
-}
+const save = vi.fn()
 
 export const functions = {
   create,
   delete: _delete,
   findById,
+  save,
 }
+
+export const fakeAnswersRepository: AnswersRepository = functions
