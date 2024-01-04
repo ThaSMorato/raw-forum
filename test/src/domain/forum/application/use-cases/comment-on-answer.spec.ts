@@ -11,6 +11,7 @@ import { InMemoryAnswerCommentsRepository } from '$/repositories/in-memory/in-me
 import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { CommentOnAnswerUseCase } from '@/domain/forum/application/use-cases/comment-on-answer'
+import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: CommentOnAnswerUseCase
 let inMemoryAnswerCommentsRepository: InMemoryAnswerCommentsRepository
@@ -35,30 +36,33 @@ describe('Comment on Answer Use Case', () => {
     it('should be able to comment on answer', async () => {
       answerFunctions.findById.mockResolvedValue(newAnswer)
 
-      const { answerComment } = await sut.execute({
+      const response = await sut.execute({
         answerId: String(newAnswer.id),
         authorId: 'author-1',
-        content: 'content',
+        content: 'new comment on answer',
       })
+
+      expect(response.isRight()).toBeTruthy()
+      if (response.isRight()) {
+        expect(response.value.answerComment.answerId).toStrictEqual(
+          newAnswer.id,
+        )
+      }
 
       expect(answerFunctions.findById).toBeCalled()
       expect(commentFunctions.create).toBeCalled()
-      expect(answerComment.answerId).toStrictEqual(newAnswer.id)
     })
     it('should throw if receives a not valid answer id', async () => {
       answerFunctions.findById.mockResolvedValue(null)
 
-      try {
-        await sut.execute({
-          answerId: 'a-not-valid-id',
-          authorId: 'author-1',
-          content: 'content',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Answer not found')
-      }
+      const response = await sut.execute({
+        answerId: 'a-not-valid-id',
+        authorId: 'author-1',
+        content: 'content',
+      })
+
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
       expect(commentFunctions.create).not.toBeCalled()
     })
   })
@@ -78,30 +82,31 @@ describe('Comment on Answer Use Case', () => {
 
       const spyCreate = vi.spyOn(inMemoryAnswerCommentsRepository, 'create')
 
-      const { answerComment } = await sut.execute({
+      const response = await sut.execute({
         answerId: String(newAnswer.id),
         authorId: 'author-1',
         content: 'new comment on answer',
       })
 
       expect(spyCreate).toBeCalled()
-      expect(answerComment.answerId).toStrictEqual(newAnswer.id)
+      expect(response.isRight()).toBeTruthy()
+      if (response.isRight()) {
+        expect(response.value.answerComment.answerId).toStrictEqual(
+          newAnswer.id,
+        )
+      }
     })
     it('should throw if receives a not valid answer id', async () => {
       await inMemoryAnswersRepository.create(newAnswer)
       const spyCreate = vi.spyOn(inMemoryAnswerCommentsRepository, 'create')
 
-      try {
-        await sut.execute({
-          answerId: `not_${newAnswer.id}`,
-          authorId: 'author-1',
-          content: 'new comment on answer',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Answer not found')
-      }
+      const response = await sut.execute({
+        answerId: `not_${newAnswer.id}`,
+        authorId: 'author-1',
+        content: 'new comment on answer',
+      })
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
       expect(spyCreate).not.toBeCalled()
     })
   })

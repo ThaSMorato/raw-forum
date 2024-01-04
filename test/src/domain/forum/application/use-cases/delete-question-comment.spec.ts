@@ -4,8 +4,11 @@ import {
   functions,
 } from '$/repositories/fake-repositories/fake-question-comments-repository'
 import { InMemoryQuestionCommentsRepository } from '$/repositories/in-memory/in-memory-question-comments-repository'
+import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { DeleteQuestionCommentUseCase } from '@/domain/forum/application/use-cases/delete-question-comment'
+import { NotAllowedError } from '@/domain/forum/application/use-cases/errors/not-allowed-error'
+import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: DeleteQuestionCommentUseCase
 let inMemoryRepository: InMemoryQuestionCommentsRepository
@@ -40,31 +43,29 @@ describe('Delete Question Comment Use Case', () => {
     it('should throw if receives a not valid author id', async () => {
       functions.findById.mockResolvedValue(newQuestionComment)
 
-      try {
-        await sut.execute({
-          questionCommentId: 'question-comment-1',
-          authorId: 'author-2',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-      }
+      const response = await sut.execute({
+        questionCommentId: 'question-comment-1',
+        authorId: 'author-2',
+      })
+
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
+
       expect(functions.delete).not.toBeCalled()
     })
     it('should throw if receives a not valid question id', async () => {
       functions.findById.mockResolvedValue(null)
 
-      try {
-        await sut.execute({
-          questionCommentId: 'a-not-valid-id',
-          authorId: 'author-1',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question Comment not found')
-      }
+      const response = await sut.execute({
+        questionCommentId: 'a-not-valid-id',
+        authorId: 'author-1',
+      })
+
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+
       expect(functions.delete).not.toBeCalled()
     })
   })
@@ -95,31 +96,27 @@ describe('Delete Question Comment Use Case', () => {
 
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
 
-      try {
-        await sut.execute({
-          questionCommentId: 'question-comment-1',
-          authorId: 'author-2',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-      }
+      const response = await sut.execute({
+        questionCommentId: 'question-comment-1',
+        authorId: 'author-2',
+      })
+
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
       expect(spyDelete).not.toBeCalled()
     })
     it('should throw if receives a not valid question id', async () => {
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
 
-      try {
-        await sut.execute({
-          questionCommentId: 'a-not-valid-id',
-          authorId: 'author-1',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question Comment not found')
-      }
+      const response = await sut.execute({
+        questionCommentId: 'a-not-valid-id',
+        authorId: 'author-1',
+      })
+
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
       expect(spyDelete).not.toBeCalled()
     })
   })

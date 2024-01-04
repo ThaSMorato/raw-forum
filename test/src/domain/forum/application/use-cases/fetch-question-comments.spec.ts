@@ -4,6 +4,7 @@ import {
   functions,
 } from '$/repositories/fake-repositories/fake-question-comments-repository'
 import { InMemoryQuestionCommentsRepository } from '$/repositories/in-memory/in-memory-question-comments-repository'
+import { Right } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { FetchQuestionCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-question-comments'
 
@@ -23,14 +24,18 @@ describe('Fetch Question Comments Use Case', () => {
       const respose = [makeQuestionComment()]
       functions.findManyByQuestionId.mockResolvedValue(respose)
 
-      const { questionComments } = await sut.execute({
+      const response = await sut.execute({
         page: 1,
         questionId: 'question-1',
       })
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(questionComments).toHaveLength(1)
-      expect(questionComments).toBe(respose)
-
+      if (response.isRight()) {
+        const { questionComments } = response.value
+        expect(questionComments).toHaveLength(1)
+        expect(questionComments).toBe(respose)
+      }
       expect(functions.findManyByQuestionId).toBeCalled()
       expect(functions.findManyByQuestionId).toBeCalledWith('question-1', {
         page: 1,
@@ -60,24 +65,29 @@ describe('Fetch Question Comments Use Case', () => {
         'findManyByQuestionId',
       )
 
-      const { questionComments } = await sut.execute({
+      const response = await sut.execute({
         page: 1,
         questionId: 'question-1',
       })
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(questionComments).toEqual([
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-      ])
+      if (response.isRight()) {
+        const { questionComments } = response.value
 
-      expect(questionComments).toHaveLength(3)
+        expect(questionComments).toEqual([
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+        ])
+        expect(questionComments).toHaveLength(3)
+      }
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })
@@ -93,21 +103,27 @@ describe('Fetch Question Comments Use Case', () => {
         'findManyByQuestionId',
       )
 
-      const { questionComments } = await sut.execute({
+      const response = await sut.execute({
         page: 2,
         questionId: 'question-1',
       })
 
-      expect(questionComments).toEqual([
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-      ])
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(questionComments).toHaveLength(2)
+      if (response.isRight()) {
+        const { questionComments } = response.value
+        expect(questionComments).toEqual([
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+        ])
+
+        expect(questionComments).toHaveLength(2)
+      }
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })

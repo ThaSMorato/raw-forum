@@ -12,6 +12,8 @@ import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-an
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { ChooseQuestionBestAnswerUseCase } from '@/domain/forum/application/use-cases/choose-question-best-answer'
+import { NotAllowedError } from '@/domain/forum/application/use-cases/errors/not-allowed-error'
+import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: ChooseQuestionBestAnswerUseCase
 let inMemoryAnswersRepository: InMemoryAnswersRepository
@@ -53,47 +55,38 @@ describe('Chose Question Best Answer Use Case', () => {
     it('should throw if receives a not valid author id', async () => {
       answerFunctions.findById.mockResolvedValue(newAnswer)
 
-      try {
-        await sut.execute({
-          answerId: String(newAnswer.id),
-          authorId: 'author-2',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-      }
+      const response = await sut.execute({
+        answerId: String(newAnswer.id),
+        authorId: 'author-2',
+      })
+
+      expect(response.value).toBeInstanceOf(NotAllowedError)
+      expect(response.isLeft()).toBeTruthy()
+
       expect(questionFunctions.save).not.toBeCalled()
     })
     it('should throw if receives a not valid answer id', async () => {
       answerFunctions.findById.mockResolvedValue(null)
 
-      try {
-        await sut.execute({
-          answerId: 'a-not-valid-id',
-          authorId: 'author-1',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Answer not found')
-      }
+      const response = await sut.execute({
+        answerId: 'a-not-valid-id',
+        authorId: 'author-1',
+      })
+
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
       expect(questionFunctions.save).not.toBeCalled()
     })
     it('should throw if question repo returns null', async () => {
       answerFunctions.findById.mockResolvedValue(newAnswer)
       questionFunctions.findById.mockResolvedValue(null)
 
-      try {
-        await sut.execute({
-          answerId: 'a-not-valid-id',
-          authorId: 'author-1',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question not found')
-      }
+      const response = await sut.execute({
+        answerId: 'a-not-valid-id',
+        authorId: 'author-1',
+      })
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
       expect(questionFunctions.save).not.toBeCalled()
     })
   })
@@ -137,31 +130,27 @@ describe('Chose Question Best Answer Use Case', () => {
 
       const spySave = vi.spyOn(inMemoryQuestionsRepository, 'save')
 
-      try {
-        await sut.execute({
-          answerId: String(newAnswer.id),
-          authorId: 'author-2',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-      }
+      const response = await sut.execute({
+        answerId: String(newAnswer.id),
+        authorId: 'author-2',
+      })
+
+      expect(response.value).toBeInstanceOf(NotAllowedError)
+      expect(response.isLeft()).toBeTruthy()
+
       expect(spySave).not.toBeCalled()
     })
     it('should throw if receives a not valid answer id', async () => {
       const spySave = vi.spyOn(inMemoryQuestionsRepository, 'save')
 
-      try {
-        await sut.execute({
-          answerId: 'a-not-valid-id',
-          authorId: 'author-1',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Answer not found')
-      }
+      const response = await sut.execute({
+        answerId: 'a-not-valid-id',
+        authorId: 'author-1',
+      })
+
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
+
       expect(spySave).not.toBeCalled()
     })
     it('should throw if returns a invalid question', async () => {
@@ -169,16 +158,15 @@ describe('Chose Question Best Answer Use Case', () => {
       const spyFindById = vi.spyOn(inMemoryQuestionsRepository, 'findById')
 
       spyFindById.mockResolvedValue(null)
-      try {
-        await sut.execute({
-          answerId: String(newAnswer.id),
-          authorId: String(newQuestion.authorId),
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Answer not found')
-      }
+
+      const response = await sut.execute({
+        answerId: String(newAnswer.id),
+        authorId: String(newQuestion.authorId),
+      })
+
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
+
       expect(spySave).not.toBeCalled()
     })
   })

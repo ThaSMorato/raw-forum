@@ -4,8 +4,11 @@ import {
   functions,
 } from '$/repositories/fake-repositories/fake-questions-repository'
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
+import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { EditQuestionUseCase } from '@/domain/forum/application/use-cases/edit-question'
+import { NotAllowedError } from '@/domain/forum/application/use-cases/errors/not-allowed-error'
+import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: EditQuestionUseCase
 let inMemoryRepository: InMemoryQuestionsRepository
@@ -33,7 +36,6 @@ describe('Edit Question Use Case', () => {
         questionId: 'question-1',
         authorId: 'author-1',
         content: 'new content',
-        title: 'new title',
       })
 
       expect(functions.findById).toBeCalled()
@@ -42,34 +44,26 @@ describe('Edit Question Use Case', () => {
     it('should throw if receives a not valid author id', async () => {
       functions.findById.mockResolvedValue(newQuestion)
 
-      try {
-        await sut.execute({
-          questionId: 'question-1',
-          authorId: 'author-2',
-          content: 'new content',
-          title: 'new title',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-      }
+      const response = await sut.execute({
+        questionId: 'question-1',
+        authorId: 'author-2',
+        content: 'new content',
+      })
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
     })
     it('should throw if receives a not valid question id', async () => {
       functions.findById.mockResolvedValue(null)
 
-      try {
-        await sut.execute({
-          questionId: 'a-not-valid-id',
-          authorId: 'author-1',
-          content: 'new content',
-          title: 'new title',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question not found')
-      }
+      const response = await sut.execute({
+        questionId: 'a-not-valid-id',
+        authorId: 'author-1',
+        content: 'new content',
+      })
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
     })
   })
 
@@ -89,7 +83,6 @@ describe('Edit Question Use Case', () => {
         questionId: 'question-1',
         authorId: 'author-1',
         content: 'new content',
-        title: 'new title',
       })
 
       expect(spyFindById).toBeCalled()
@@ -97,7 +90,6 @@ describe('Edit Question Use Case', () => {
       expect(inMemoryRepository.items.length).toBe(1)
       expect(inMemoryRepository.items[0]).toMatchObject({
         content: 'new content',
-        title: 'new title',
       })
     })
     it('should throw if receives a not valid author id', async () => {
@@ -105,36 +97,28 @@ describe('Edit Question Use Case', () => {
 
       const spyEdit = vi.spyOn(inMemoryRepository, 'save')
 
-      try {
-        await sut.execute({
-          questionId: 'question-1',
-          authorId: 'author-2',
-          content: 'new content',
-          title: 'new title',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-        expect(spyEdit).not.toBeCalled()
-      }
+      const response = await sut.execute({
+        questionId: 'question-1',
+        authorId: 'author-2',
+        content: 'new content',
+      })
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
+      expect(spyEdit).not.toBeCalled()
     })
     it('should throw if receives a not valid question id', async () => {
       const spyEdit = vi.spyOn(inMemoryRepository, 'save')
 
-      try {
-        await sut.execute({
-          questionId: 'a-not-valid-id',
-          authorId: 'author-1',
-          content: 'new content',
-          title: 'new title',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question not found')
-        expect(spyEdit).not.toBeCalled()
-      }
+      const response = await sut.execute({
+        questionId: 'a-not-valid-id',
+        authorId: 'author-1',
+        content: 'new content',
+      })
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(spyEdit).not.toBeCalled()
     })
   })
 })

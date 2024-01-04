@@ -4,6 +4,7 @@ import {
   functions,
 } from '$/repositories/fake-repositories/fake-answers-repository'
 import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
+import { Right } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { FetchQuestionAnswersUseCase } from '@/domain/forum/application/use-cases/fetch-question-answers'
 
@@ -23,14 +24,18 @@ describe('Fetch Question Answers Use Case', () => {
       const respose = [makeAnswer()]
       functions.findManyByQuestionId.mockResolvedValue(respose)
 
-      const { answers } = await sut.execute({
+      const response = await sut.execute({
         page: 1,
         questionId: 'question-1',
       })
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(answers).toHaveLength(1)
-      expect(answers).toBe(respose)
-
+      if (response.isRight()) {
+        const { answers } = response.value
+        expect(answers).toHaveLength(1)
+        expect(answers).toBe(respose)
+      }
       expect(functions.findManyByQuestionId).toBeCalled()
       expect(functions.findManyByQuestionId).toBeCalledWith('question-1', {
         page: 1,
@@ -60,24 +65,29 @@ describe('Fetch Question Answers Use Case', () => {
         'findManyByQuestionId',
       )
 
-      const { answers } = await sut.execute({
+      const response = await sut.execute({
         page: 1,
         questionId: 'question-1',
       })
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(answers).toEqual([
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-      ])
+      if (response.isRight()) {
+        const { answers } = response.value
+        expect(answers).toEqual([
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+        ])
 
-      expect(answers).toHaveLength(3)
+        expect(answers).toHaveLength(3)
+      }
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })
@@ -93,22 +103,26 @@ describe('Fetch Question Answers Use Case', () => {
         'findManyByQuestionId',
       )
 
-      const { answers } = await sut.execute({
+      const response = await sut.execute({
         page: 2,
         questionId: 'question-1',
       })
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(answers).toEqual([
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-        expect.objectContaining({
-          questionId: new UniqueEntityID('question-1'),
-        }),
-      ])
+      if (response.isRight()) {
+        const { answers } = response.value
+        expect(answers).toEqual([
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+          expect.objectContaining({
+            questionId: new UniqueEntityID('question-1'),
+          }),
+        ])
 
-      expect(answers).toHaveLength(2)
-
+        expect(answers).toHaveLength(2)
+      }
       expect(spyFindManyByQuestionId).toBeCalled()
     })
   })

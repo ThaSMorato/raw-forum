@@ -15,17 +15,21 @@ describe('Create Question Use Case', () => {
       sut = new CreateQuestionUseCase(fakeQuestionsRepository)
     })
     it('should be able to create a question', async () => {
-      const { question } = await sut.execute({
+      const response = await sut.execute({
         authorId: '1',
         title: 'Nova pergunta',
         content: 'Conteúdo da nova pergunta',
       })
 
-      expect(question.title).toEqual('Nova pergunta')
-      expect(question.slug.value).toEqual('nova-pergunta')
-      expect(question.authorId.toValue()).toEqual('1')
-      expect(question.content).toEqual('Conteúdo da nova pergunta')
-      expect(question.id.toValue()).toEqual(expect.any(String))
+      expect(response.isRight()).toBeTruthy()
+      if (response.isRight()) {
+        const { question } = response.value
+        expect(question.title).toEqual('Nova pergunta')
+        expect(question.slug.value).toEqual('nova-pergunta')
+        expect(question.authorId.toValue()).toEqual('1')
+        expect(question.content).toEqual('Conteúdo da nova pergunta')
+        expect(question.id.toValue()).toEqual(expect.any(String))
+      }
 
       expect(fakeQuestionsRepository.create).toBeCalled()
     })
@@ -40,21 +44,25 @@ describe('Create Question Use Case', () => {
     it('should be able to create a question', async () => {
       const spyCreate = vi.spyOn(inMemoryRepository, 'create')
 
-      const { question } = await sut.execute({
+      const response = await sut.execute({
         authorId: '1',
         title: 'Nova pergunta',
         content: 'Conteúdo da nova pergunta',
       })
 
-      expect(question.title).toEqual('Nova pergunta')
-      expect(question.slug.value).toEqual('nova-pergunta')
-      expect(question.authorId.toValue()).toEqual('1')
-      expect(question.content).toEqual('Conteúdo da nova pergunta')
-      expect(question.id.toValue()).toEqual(expect.any(String))
+      expect(response.isRight()).toBeTruthy()
+      if (response.isRight()) {
+        const { question } = response.value
+        expect(question.title).toEqual('Nova pergunta')
+        expect(question.slug.value).toEqual('nova-pergunta')
+        expect(question.authorId.toValue()).toEqual('1')
+        expect(question.content).toEqual('Conteúdo da nova pergunta')
+        expect(question.id.toValue()).toEqual(expect.any(String))
+        expect(inMemoryRepository.items[0].id).toEqual(question.id)
+      }
 
       expect(spyCreate).toBeCalled()
 
-      expect(inMemoryRepository.items[0].id).toEqual(question.id)
       expect(inMemoryRepository.items.length).toEqual(1)
     })
   })

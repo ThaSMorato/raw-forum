@@ -4,8 +4,11 @@ import {
   functions,
 } from '$/repositories/fake-repositories/fake-questions-repository'
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
+import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { DeleteQuestionUseCase } from '@/domain/forum/application/use-cases/delete-question'
+import { NotAllowedError } from '@/domain/forum/application/use-cases/errors/not-allowed-error'
+import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: DeleteQuestionUseCase
 let inMemoryRepository: InMemoryQuestionsRepository
@@ -40,30 +43,26 @@ describe('Delete Question Use Case', () => {
     it('should throw if receives a not valid author id', async () => {
       functions.findById.mockResolvedValue(newQuestion)
 
-      try {
-        await sut.execute({
-          questionId: 'question-1',
-          authorId: 'author-2',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-      }
+      const response = await sut.execute({
+        questionId: 'question-1',
+        authorId: 'author-2',
+      })
+
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
     })
     it('should throw if receives a not valid question id', async () => {
       functions.findById.mockResolvedValue(null)
 
-      try {
-        await sut.execute({
-          questionId: 'a-not-valid-id',
-          authorId: 'author-1',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question not found')
-      }
+      const response = await sut.execute({
+        questionId: 'a-not-valid-id',
+        authorId: 'author-1',
+      })
+
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
     })
   })
 
@@ -93,32 +92,26 @@ describe('Delete Question Use Case', () => {
 
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
 
-      try {
-        await sut.execute({
-          questionId: 'question-1',
-          authorId: 'author-2',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Not allowed')
-        expect(spyDelete).not.toBeCalled()
-      }
+      const response = await sut.execute({
+        questionId: 'question-1',
+        authorId: 'author-2',
+      })
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
+      expect(spyDelete).not.toBeCalled()
     })
     it('should throw if receives a not valid question id', async () => {
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
 
-      try {
-        await sut.execute({
-          questionId: 'a-not-valid-id',
-          authorId: 'author-1',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question not found')
-        expect(spyDelete).not.toBeCalled()
-      }
+      const response = await sut.execute({
+        questionId: 'a-not-valid-id',
+        authorId: 'author-1',
+      })
+      expect(response).toBeInstanceOf(Left)
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(spyDelete).not.toBeCalled()
     })
   })
 })

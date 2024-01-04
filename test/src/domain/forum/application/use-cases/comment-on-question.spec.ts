@@ -11,6 +11,7 @@ import { InMemoryQuestionCommentsRepository } from '$/repositories/in-memory/in-
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { CommentOnQuestionUseCase } from '@/domain/forum/application/use-cases/comment-on-question'
+import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: CommentOnQuestionUseCase
 let inMemoryQuestionCommentsRepository: InMemoryQuestionCommentsRepository
@@ -35,7 +36,7 @@ describe('Comment on Question Use Case', () => {
     it('should be able to comment on question', async () => {
       questionFunctions.findById.mockResolvedValue(newQuestion)
 
-      const { questionComment } = await sut.execute({
+      const response = await sut.execute({
         questionId: String(newQuestion.id),
         authorId: 'author-1',
         content: 'content',
@@ -43,22 +44,23 @@ describe('Comment on Question Use Case', () => {
 
       expect(questionFunctions.findById).toBeCalled()
       expect(commentFunctions.create).toBeCalled()
-      expect(questionComment.questionId).toStrictEqual(newQuestion.id)
+      expect(response.isRight()).toBeTruthy()
+      if (response.isRight()) {
+        expect(response.value.questionComment.questionId).toStrictEqual(
+          newQuestion.id,
+        )
+      }
     })
     it('should throw if receives a not valid question id', async () => {
       questionFunctions.findById.mockResolvedValue(null)
 
-      try {
-        await sut.execute({
-          questionId: 'a-not-valid-id',
-          authorId: 'author-1',
-          content: 'content',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question not found')
-      }
+      const response = await sut.execute({
+        questionId: 'a-not-valid-id',
+        authorId: 'author-1',
+        content: 'content',
+      })
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
       expect(commentFunctions.create).not.toBeCalled()
     })
   })
@@ -79,30 +81,32 @@ describe('Comment on Question Use Case', () => {
 
       const spyCreate = vi.spyOn(inMemoryQuestionCommentsRepository, 'create')
 
-      const { questionComment } = await sut.execute({
+      const response = await sut.execute({
         questionId: String(newQuestion.id),
         authorId: 'author-1',
         content: 'new comment on question',
       })
 
       expect(spyCreate).toBeCalled()
-      expect(questionComment.questionId).toStrictEqual(newQuestion.id)
+      expect(response.isRight()).toBeTruthy()
+      if (response.isRight()) {
+        expect(response.value.questionComment.questionId).toStrictEqual(
+          newQuestion.id,
+        )
+      }
     })
     it('should throw if receives a not valid question id', async () => {
       await inMemoryQuestionsRepository.create(newQuestion)
       const spyCreate = vi.spyOn(inMemoryQuestionCommentsRepository, 'create')
 
-      try {
-        await sut.execute({
-          questionId: `not_${newQuestion.id}`,
-          authorId: 'author-1',
-          content: 'new comment on question',
-        })
-      } catch (error) {
-        const err = error as Error
-        expect(err).toBeInstanceOf(Error)
-        expect(err.message).toEqual('Question not found')
-      }
+      const response = await sut.execute({
+        questionId: `not_${newQuestion.id}`,
+        authorId: 'author-1',
+        content: 'new comment on question',
+      })
+
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(response.isLeft()).toBeTruthy()
       expect(spyCreate).not.toBeCalled()
     })
   })

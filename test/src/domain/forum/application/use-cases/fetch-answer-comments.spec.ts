@@ -4,6 +4,7 @@ import {
   functions,
 } from '$/repositories/fake-repositories/fake-answer-comments-repository'
 import { InMemoryAnswerCommentsRepository } from '$/repositories/in-memory/in-memory-answer-comments-repository'
+import { Right } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { FetchAnswerCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-answer-comments'
 
@@ -23,14 +24,18 @@ describe('Fetch Answer Comments Use Case', () => {
       const respose = [makeAnswerComment()]
       functions.findManyByAnswerId.mockResolvedValue(respose)
 
-      const { answerComments } = await sut.execute({
+      const response = await sut.execute({
         page: 1,
         answerId: 'answer-1',
       })
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(answerComments).toHaveLength(1)
-      expect(answerComments).toBe(respose)
-
+      if (response.isRight()) {
+        const { answerComments } = response.value
+        expect(answerComments).toHaveLength(1)
+        expect(answerComments).toBe(respose)
+      }
       expect(functions.findManyByAnswerId).toBeCalled()
       expect(functions.findManyByAnswerId).toBeCalledWith('answer-1', {
         page: 1,
@@ -60,24 +65,29 @@ describe('Fetch Answer Comments Use Case', () => {
         'findManyByAnswerId',
       )
 
-      const { answerComments } = await sut.execute({
+      const response = await sut.execute({
         page: 1,
         answerId: 'answer-1',
       })
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(answerComments).toEqual([
-        expect.objectContaining({
-          answerId: new UniqueEntityID('answer-1'),
-        }),
-        expect.objectContaining({
-          answerId: new UniqueEntityID('answer-1'),
-        }),
-        expect.objectContaining({
-          answerId: new UniqueEntityID('answer-1'),
-        }),
-      ])
+      if (response.isRight()) {
+        const { answerComments } = response.value
 
-      expect(answerComments).toHaveLength(3)
+        expect(answerComments).toEqual([
+          expect.objectContaining({
+            answerId: new UniqueEntityID('answer-1'),
+          }),
+          expect.objectContaining({
+            answerId: new UniqueEntityID('answer-1'),
+          }),
+          expect.objectContaining({
+            answerId: new UniqueEntityID('answer-1'),
+          }),
+        ])
+        expect(answerComments).toHaveLength(3)
+      }
 
       expect(spyFindManyByAnswerId).toBeCalled()
     })
@@ -93,21 +103,27 @@ describe('Fetch Answer Comments Use Case', () => {
         'findManyByAnswerId',
       )
 
-      const { answerComments } = await sut.execute({
+      const response = await sut.execute({
         page: 2,
         answerId: 'answer-1',
       })
 
-      expect(answerComments).toEqual([
-        expect.objectContaining({
-          answerId: new UniqueEntityID('answer-1'),
-        }),
-        expect.objectContaining({
-          answerId: new UniqueEntityID('answer-1'),
-        }),
-      ])
+      expect(response).toBeInstanceOf(Right)
+      expect(response.isRight()).toBeTruthy()
 
-      expect(answerComments).toHaveLength(2)
+      if (response.isRight()) {
+        const { answerComments } = response.value
+        expect(answerComments).toEqual([
+          expect.objectContaining({
+            answerId: new UniqueEntityID('answer-1'),
+          }),
+          expect.objectContaining({
+            answerId: new UniqueEntityID('answer-1'),
+          }),
+        ])
+
+        expect(answerComments).toHaveLength(2)
+      }
 
       expect(spyFindManyByAnswerId).toBeCalled()
     })

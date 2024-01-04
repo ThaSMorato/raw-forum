@@ -16,15 +16,19 @@ describe('Answer Question Use Case', () => {
     })
 
     it('should be able to answer a question', async () => {
-      const { answer } = await sut.execute({
+      const result = await sut.execute({
         content: 'Nova Resposta',
         instructorId: '1',
         questionId: '1',
       })
 
-      expect(answer.content).toEqual('Nova Resposta')
-      expect(answer.authorId.toValue()).toEqual('1')
-      expect(answer.questionId.toValue()).toEqual('1')
+      expect(result.isRight()).toBeTruthy()
+      if (result.isRight()) {
+        const { answer } = result.value
+        expect(answer.content).toEqual('Nova Resposta')
+        expect(answer.authorId.toValue()).toEqual('1')
+        expect(answer.questionId.toValue()).toEqual('1')
+      }
 
       expect(fakeAnswersRepository.create).toBeCalled()
     })
@@ -38,20 +42,24 @@ describe('Answer Question Use Case', () => {
     it('should be able to answer a question', async () => {
       const spyCreate = vi.spyOn(inMemoryRepository, 'create')
 
-      const { answer } = await sut.execute({
+      const result = await sut.execute({
         content: 'Nova Resposta',
         instructorId: '1',
         questionId: '1',
       })
 
-      expect(answer.content).toEqual('Nova Resposta')
-      expect(answer.authorId.toValue()).toEqual('1')
-      expect(answer.questionId.toValue()).toEqual('1')
+      expect(result.isRight()).toBeTruthy()
+      if (result.isRight()) {
+        const { answer } = result.value
+        expect(answer.content).toEqual('Nova Resposta')
+        expect(answer.authorId.toValue()).toEqual('1')
+        expect(answer.questionId.toValue()).toEqual('1')
+        expect(inMemoryRepository.items[0].id).toEqual(answer.id)
+      }
 
       expect(spyCreate).toBeCalled()
 
       expect(inMemoryRepository.items.length).toEqual(1)
-      expect(inMemoryRepository.items[0].id).toEqual(answer.id)
     })
   })
 })
