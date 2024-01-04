@@ -84,6 +84,7 @@ describe('Fetch Recent Questions Use Case', () => {
         expect.objectContaining({ createdAt: new Date(2023, 0, 2) }),
         expect.objectContaining({ createdAt: new Date(2023, 0, 1) }),
       ])
+      expect(questions).toHaveLength(2)
 
       expect(spyFindManyRecent).toBeCalled()
     })
