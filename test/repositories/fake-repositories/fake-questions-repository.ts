@@ -6,6 +6,7 @@ const findBySlug = vi.fn()
 const _delete = vi.fn()
 const findById = vi.fn()
 const save = vi.fn()
+const findManyRecent = vi.fn()
 
 export const functions = {
   create,
@@ -13,6 +14,7 @@ export const functions = {
   delete: _delete,
   findById,
   save,
+  findManyRecent,
 }
 
 export const fakeQuestionsRepository: QuestionsRepository = functions
