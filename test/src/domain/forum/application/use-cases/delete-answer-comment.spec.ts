@@ -7,6 +7,8 @@ import { InMemoryAnswerCommentsRepository } from '$/repositories/in-memory/in-me
 import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { DeleteAnswerCommentUseCase } from '@/domain/forum/application/use-cases/delete-answer-comment'
+import { NotAllowedError } from '@/domain/forum/application/use-cases/errors/not-allowed-error'
+import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: DeleteAnswerCommentUseCase
 let inMemoryRepository: InMemoryAnswerCommentsRepository
@@ -47,7 +49,8 @@ describe('Delete Answer Comment Use Case', () => {
       })
 
       expect(response).toBeInstanceOf(Left)
-      expect(response.value).toEqual('Not allowed')
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
 
       expect(functions.delete).not.toBeCalled()
     })
@@ -60,7 +63,8 @@ describe('Delete Answer Comment Use Case', () => {
       })
 
       expect(response).toBeInstanceOf(Left)
-      expect(response.value).toEqual('Answer Comment not found')
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
 
       expect(functions.delete).not.toBeCalled()
     })
@@ -98,7 +102,8 @@ describe('Delete Answer Comment Use Case', () => {
       })
 
       expect(response).toBeInstanceOf(Left)
-      expect(response.value).toEqual('Not allowed')
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(NotAllowedError)
       expect(spyDelete).not.toBeCalled()
     })
     it('should throw if receives a not valid answer id', async () => {
@@ -110,8 +115,8 @@ describe('Delete Answer Comment Use Case', () => {
       })
 
       expect(response).toBeInstanceOf(Left)
-      expect(response.value).toEqual('Answer Comment not found')
-
+      expect(response.isLeft()).toBeTruthy()
+      expect(response.value).toBeInstanceOf(ResourceNotFoundError)
       expect(spyDelete).not.toBeCalled()
     })
   })
