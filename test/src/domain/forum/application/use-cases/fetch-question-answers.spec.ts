@@ -31,11 +31,9 @@ describe('Fetch Question Answers Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { answers } = response.value
-        expect(answers).toHaveLength(1)
-        expect(answers).toBe(respose)
-      }
+      expect(response.value?.answers).toHaveLength(1)
+      expect(response.value?.answers).toBe(respose)
+
       expect(functions.findManyByQuestionId).toBeCalled()
       expect(functions.findManyByQuestionId).toBeCalledWith('question-1', {
         page: 1,
@@ -72,22 +70,19 @@ describe('Fetch Question Answers Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { answers } = response.value
-        expect(answers).toEqual([
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-        ])
+      expect(response.value?.answers).toEqual([
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+      ])
 
-        expect(answers).toHaveLength(3)
-      }
+      expect(response.value?.answers).toHaveLength(3)
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })
@@ -110,19 +105,17 @@ describe('Fetch Question Answers Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { answers } = response.value
-        expect(answers).toEqual([
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-        ])
+      expect(response.value?.answers).toEqual([
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+      ])
 
-        expect(answers).toHaveLength(2)
-      }
+      expect(response.value?.answers).toHaveLength(2)
+
       expect(spyFindManyByQuestionId).toBeCalled()
     })
   })

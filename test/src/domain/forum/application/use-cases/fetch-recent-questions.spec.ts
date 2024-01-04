@@ -29,11 +29,9 @@ describe('Fetch Recent Questions Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { questions } = response.value
-        expect(questions).toHaveLength(1)
-        expect(questions).toBe(respose)
-      }
+      expect(response.value?.questions).toHaveLength(1)
+      expect(response.value?.questions).toBe(respose)
+
       expect(functions.findManyRecent).toBeCalled()
       expect(functions.findManyRecent).toBeCalledWith({
         page: 1,
@@ -66,14 +64,12 @@ describe('Fetch Recent Questions Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { questions } = response.value
-        expect(questions).toEqual([
-          expect.objectContaining({ createdAt: new Date(2023, 0, 23) }),
-          expect.objectContaining({ createdAt: new Date(2023, 0, 20) }),
-          expect.objectContaining({ createdAt: new Date(2023, 0, 18) }),
-        ])
-      }
+      expect(response.value?.questions).toEqual([
+        expect.objectContaining({ createdAt: new Date(2023, 0, 23) }),
+        expect.objectContaining({ createdAt: new Date(2023, 0, 20) }),
+        expect.objectContaining({ createdAt: new Date(2023, 0, 18) }),
+      ])
+
       expect(spyFindManyRecent).toBeCalled()
     })
 
@@ -91,14 +87,12 @@ describe('Fetch Recent Questions Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { questions } = response.value
-        expect(questions).toEqual([
-          expect.objectContaining({ createdAt: new Date(2023, 0, 2) }),
-          expect.objectContaining({ createdAt: new Date(2023, 0, 1) }),
-        ])
-        expect(questions).toHaveLength(2)
-      }
+      expect(response.value?.questions).toEqual([
+        expect.objectContaining({ createdAt: new Date(2023, 0, 2) }),
+        expect.objectContaining({ createdAt: new Date(2023, 0, 1) }),
+      ])
+      expect(response.value?.questions).toHaveLength(2)
+
       expect(spyFindManyRecent).toBeCalled()
     })
   })

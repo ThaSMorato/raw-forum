@@ -23,12 +23,10 @@ describe('Answer Question Use Case', () => {
       })
 
       expect(result.isRight()).toBeTruthy()
-      if (result.isRight()) {
-        const { answer } = result.value
-        expect(answer.content).toEqual('Nova Resposta')
-        expect(answer.authorId.toValue()).toEqual('1')
-        expect(answer.questionId.toValue()).toEqual('1')
-      }
+
+      expect(result.value?.answer.content).toEqual('Nova Resposta')
+      expect(result.value?.answer.authorId.toValue()).toEqual('1')
+      expect(result.value?.answer.questionId.toValue()).toEqual('1')
 
       expect(fakeAnswersRepository.create).toBeCalled()
     })
@@ -49,13 +47,10 @@ describe('Answer Question Use Case', () => {
       })
 
       expect(result.isRight()).toBeTruthy()
-      if (result.isRight()) {
-        const { answer } = result.value
-        expect(answer.content).toEqual('Nova Resposta')
-        expect(answer.authorId.toValue()).toEqual('1')
-        expect(answer.questionId.toValue()).toEqual('1')
-        expect(inMemoryRepository.items[0].id).toEqual(answer.id)
-      }
+      expect(result.value?.answer.content).toEqual('Nova Resposta')
+      expect(result.value?.answer.authorId.toValue()).toEqual('1')
+      expect(result.value?.answer.questionId.toValue()).toEqual('1')
+      expect(inMemoryRepository.items[0].id).toEqual(result.value?.answer.id)
 
       expect(spyCreate).toBeCalled()
 

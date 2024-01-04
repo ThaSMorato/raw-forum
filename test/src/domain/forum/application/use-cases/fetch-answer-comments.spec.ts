@@ -31,11 +31,9 @@ describe('Fetch Answer Comments Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { answerComments } = response.value
-        expect(answerComments).toHaveLength(1)
-        expect(answerComments).toBe(respose)
-      }
+      expect(response.value?.answerComments).toHaveLength(1)
+      expect(response.value?.answerComments).toBe(respose)
+
       expect(functions.findManyByAnswerId).toBeCalled()
       expect(functions.findManyByAnswerId).toBeCalledWith('answer-1', {
         page: 1,
@@ -72,22 +70,18 @@ describe('Fetch Answer Comments Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { answerComments } = response.value
-
-        expect(answerComments).toEqual([
-          expect.objectContaining({
-            answerId: new UniqueEntityID('answer-1'),
-          }),
-          expect.objectContaining({
-            answerId: new UniqueEntityID('answer-1'),
-          }),
-          expect.objectContaining({
-            answerId: new UniqueEntityID('answer-1'),
-          }),
-        ])
-        expect(answerComments).toHaveLength(3)
-      }
+      expect(response.value?.answerComments).toEqual([
+        expect.objectContaining({
+          answerId: new UniqueEntityID('answer-1'),
+        }),
+        expect.objectContaining({
+          answerId: new UniqueEntityID('answer-1'),
+        }),
+        expect.objectContaining({
+          answerId: new UniqueEntityID('answer-1'),
+        }),
+      ])
+      expect(response.value?.answerComments).toHaveLength(3)
 
       expect(spyFindManyByAnswerId).toBeCalled()
     })
@@ -111,19 +105,16 @@ describe('Fetch Answer Comments Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { answerComments } = response.value
-        expect(answerComments).toEqual([
-          expect.objectContaining({
-            answerId: new UniqueEntityID('answer-1'),
-          }),
-          expect.objectContaining({
-            answerId: new UniqueEntityID('answer-1'),
-          }),
-        ])
+      expect(response.value?.answerComments).toEqual([
+        expect.objectContaining({
+          answerId: new UniqueEntityID('answer-1'),
+        }),
+        expect.objectContaining({
+          answerId: new UniqueEntityID('answer-1'),
+        }),
+      ])
 
-        expect(answerComments).toHaveLength(2)
-      }
+      expect(response.value?.answerComments).toHaveLength(2)
 
       expect(spyFindManyByAnswerId).toBeCalled()
     })

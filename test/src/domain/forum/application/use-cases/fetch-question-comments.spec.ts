@@ -31,11 +31,9 @@ describe('Fetch Question Comments Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { questionComments } = response.value
-        expect(questionComments).toHaveLength(1)
-        expect(questionComments).toBe(respose)
-      }
+      expect(response.value?.questionComments).toHaveLength(1)
+      expect(response.value?.questionComments).toBe(respose)
+
       expect(functions.findManyByQuestionId).toBeCalled()
       expect(functions.findManyByQuestionId).toBeCalledWith('question-1', {
         page: 1,
@@ -72,22 +70,18 @@ describe('Fetch Question Comments Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { questionComments } = response.value
-
-        expect(questionComments).toEqual([
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-        ])
-        expect(questionComments).toHaveLength(3)
-      }
+      expect(response.value?.questionComments).toEqual([
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+      ])
+      expect(response.value?.questionComments).toHaveLength(3)
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })
@@ -111,19 +105,16 @@ describe('Fetch Question Comments Use Case', () => {
       expect(response).toBeInstanceOf(Right)
       expect(response.isRight()).toBeTruthy()
 
-      if (response.isRight()) {
-        const { questionComments } = response.value
-        expect(questionComments).toEqual([
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-          expect.objectContaining({
-            questionId: new UniqueEntityID('question-1'),
-          }),
-        ])
+      expect(response.value?.questionComments).toEqual([
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+        expect.objectContaining({
+          questionId: new UniqueEntityID('question-1'),
+        }),
+      ])
 
-        expect(questionComments).toHaveLength(2)
-      }
+      expect(response.value?.questionComments).toHaveLength(2)
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })

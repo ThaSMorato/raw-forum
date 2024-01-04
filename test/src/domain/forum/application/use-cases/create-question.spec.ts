@@ -22,14 +22,14 @@ describe('Create Question Use Case', () => {
       })
 
       expect(response.isRight()).toBeTruthy()
-      if (response.isRight()) {
-        const { question } = response.value
-        expect(question.title).toEqual('Nova pergunta')
-        expect(question.slug.value).toEqual('nova-pergunta')
-        expect(question.authorId.toValue()).toEqual('1')
-        expect(question.content).toEqual('Conteúdo da nova pergunta')
-        expect(question.id.toValue()).toEqual(expect.any(String))
-      }
+
+      expect(response.value?.question.title).toEqual('Nova pergunta')
+      expect(response.value?.question.slug.value).toEqual('nova-pergunta')
+      expect(response.value?.question.authorId.toValue()).toEqual('1')
+      expect(response.value?.question.content).toEqual(
+        'Conteúdo da nova pergunta',
+      )
+      expect(response.value?.question.id.toValue()).toEqual(expect.any(String))
 
       expect(fakeQuestionsRepository.create).toBeCalled()
     })
@@ -51,15 +51,17 @@ describe('Create Question Use Case', () => {
       })
 
       expect(response.isRight()).toBeTruthy()
-      if (response.isRight()) {
-        const { question } = response.value
-        expect(question.title).toEqual('Nova pergunta')
-        expect(question.slug.value).toEqual('nova-pergunta')
-        expect(question.authorId.toValue()).toEqual('1')
-        expect(question.content).toEqual('Conteúdo da nova pergunta')
-        expect(question.id.toValue()).toEqual(expect.any(String))
-        expect(inMemoryRepository.items[0].id).toEqual(question.id)
-      }
+
+      expect(response.value?.question.title).toEqual('Nova pergunta')
+      expect(response.value?.question.slug.value).toEqual('nova-pergunta')
+      expect(response.value?.question.authorId.toValue()).toEqual('1')
+      expect(response.value?.question.content).toEqual(
+        'Conteúdo da nova pergunta',
+      )
+      expect(response.value?.question.id.toValue()).toEqual(expect.any(String))
+      expect(inMemoryRepository.items[0].id).toEqual(
+        response.value?.question.id,
+      )
 
       expect(spyCreate).toBeCalled()
 
