@@ -7,14 +7,6 @@ const _delete = vi.fn()
 const findById = vi.fn()
 const save = vi.fn()
 
-export const fakeQuestionsRepository: QuestionsRepository = {
-  create,
-  findBySlug,
-  delete: _delete,
-  findById,
-  save,
-}
-
 export const functions = {
   create,
   findBySlug,
@@ -22,3 +14,5 @@ export const functions = {
   findById,
   save,
 }
+
+export const fakeQuestionsRepository: QuestionsRepository = functions
