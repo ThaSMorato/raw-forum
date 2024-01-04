@@ -4,7 +4,7 @@ import {
   functions,
 } from '$/repositories/fake-repositories/fake-answer-comments-repository'
 import { InMemoryAnswerCommentsRepository } from '$/repositories/in-memory/in-memory-answer-comments-repository'
-import { Right } from '@/core/either'
+import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { DeleteAnswerCommentUseCase } from '@/domain/forum/application/use-cases/delete-answer-comment'
 
@@ -41,26 +41,26 @@ describe('Delete Answer Comment Use Case', () => {
     it('should throw if receives a not valid author id', async () => {
       functions.findById.mockResolvedValue(newAnswerComment)
 
-      const right = await sut.execute({
+      const response = await sut.execute({
         answerCommentId: 'answer-comment-1',
         authorId: 'author-2',
       })
 
-      expect(right).toBeInstanceOf(Right)
-      expect(right.value).toEqual('Not allowed')
+      expect(response).toBeInstanceOf(Left)
+      expect(response.value).toEqual('Not allowed')
 
       expect(functions.delete).not.toBeCalled()
     })
     it('should throw if receives a not valid answer id', async () => {
       functions.findById.mockResolvedValue(null)
 
-      const right = await sut.execute({
+      const response = await sut.execute({
         answerCommentId: 'a-not-valid-id',
         authorId: 'author-1',
       })
 
-      expect(right).toBeInstanceOf(Right)
-      expect(right.value).toEqual('Answer Comment not found')
+      expect(response).toBeInstanceOf(Left)
+      expect(response.value).toEqual('Answer Comment not found')
 
       expect(functions.delete).not.toBeCalled()
     })
@@ -92,25 +92,25 @@ describe('Delete Answer Comment Use Case', () => {
 
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
 
-      const right = await sut.execute({
+      const response = await sut.execute({
         answerCommentId: 'answer-comment-1',
         authorId: 'author-2',
       })
 
-      expect(right).toBeInstanceOf(Right)
-      expect(right.value).toEqual('Not allowed')
+      expect(response).toBeInstanceOf(Left)
+      expect(response.value).toEqual('Not allowed')
       expect(spyDelete).not.toBeCalled()
     })
     it('should throw if receives a not valid answer id', async () => {
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
 
-      const right = await sut.execute({
+      const response = await sut.execute({
         answerCommentId: 'a-not-valid-id',
         authorId: 'author-1',
       })
 
-      expect(right).toBeInstanceOf(Right)
-      expect(right.value).toEqual('Answer Comment not found')
+      expect(response).toBeInstanceOf(Left)
+      expect(response.value).toEqual('Answer Comment not found')
 
       expect(spyDelete).not.toBeCalled()
     })

@@ -6,7 +6,7 @@ interface DeleteAnswerCommentUseCaseRequest {
   authorId: string
 }
 
-type DeleteAnswerCommentUseCaseResponse = Either<string, object>
+type DeleteAnswerCommentUseCaseResponse = Either<string, {}>
 
 export class DeleteAnswerCommentUseCase {
   constructor(private answerCommentsRepository: AnswerCommentsRepository) {}
@@ -19,15 +19,15 @@ export class DeleteAnswerCommentUseCase {
       await this.answerCommentsRepository.findById(answerCommentId)
 
     if (!answerComment) {
-      return right('Answer Comment not found')
+      return left('Answer Comment not found')
     }
 
     if (authorId !== String(answerComment.authorId)) {
-      return right('Not allowed')
+      return left('Not allowed')
     }
 
     await this.answerCommentsRepository.delete(answerComment)
 
-    return left({})
+    return right({})
   }
 }
