@@ -1,35 +1,35 @@
-import { makeAnswer } from '$/factories/make-answer'
+import { makeQuestionComment } from '$/factories/make-question-comment'
 import {
-  fakeAnswersRepository,
+  fakeQuestionCommentsRepository,
   functions,
-} from '$/repositories/fake-repositories/fake-answers-repository'
-import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
+} from '$/repositories/fake-repositories/fake-question-comments-repository'
+import { InMemoryQuestionCommentsRepository } from '$/repositories/in-memory/in-memory-question-comments-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { FetchQuestionAnswersUseCase } from '@/domain/forum/application/use-cases/fetch-question-answers'
+import { FetchQuestionCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-question-comments'
 
-let sut: FetchQuestionAnswersUseCase
-let inMemoryRepository: InMemoryAnswersRepository
+let sut: FetchQuestionCommentsUseCase
+let inMemoryRepository: InMemoryQuestionCommentsRepository
 
-describe('Fetch Question Answers Use Case', () => {
+describe('Fetch Question Comments Use Case', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   describe('Unity tests', () => {
     beforeEach(() => {
-      sut = new FetchQuestionAnswersUseCase(fakeAnswersRepository)
+      sut = new FetchQuestionCommentsUseCase(fakeQuestionCommentsRepository)
     })
-    it('should be able to fetch question`s answers', async () => {
-      const respose = [makeAnswer()]
+    it('should be able to fetch question`s comments', async () => {
+      const respose = [makeQuestionComment()]
       functions.findManyByQuestionId.mockResolvedValue(respose)
 
-      const { answers } = await sut.execute({
+      const { questionComments } = await sut.execute({
         page: 1,
         questionId: 'question-1',
       })
 
-      expect(answers).toHaveLength(1)
-      expect(answers).toBe(respose)
+      expect(questionComments).toHaveLength(1)
+      expect(questionComments).toBe(respose)
 
       expect(functions.findManyByQuestionId).toBeCalled()
       expect(functions.findManyByQuestionId).toBeCalledWith('question-1', {
@@ -40,19 +40,19 @@ describe('Fetch Question Answers Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryAnswersRepository()
-      sut = new FetchQuestionAnswersUseCase(inMemoryRepository)
+      inMemoryRepository = new InMemoryQuestionCommentsRepository()
+      sut = new FetchQuestionCommentsUseCase(inMemoryRepository)
     })
 
-    it('should be able to fetch question`s answers', async () => {
+    it('should be able to fetch question`s questionComments', async () => {
       await inMemoryRepository.create(
-        makeAnswer({ questionId: new UniqueEntityID('question-1') }),
+        makeQuestionComment({ questionId: new UniqueEntityID('question-1') }),
       )
       await inMemoryRepository.create(
-        makeAnswer({ questionId: new UniqueEntityID('question-1') }),
+        makeQuestionComment({ questionId: new UniqueEntityID('question-1') }),
       )
       await inMemoryRepository.create(
-        makeAnswer({ questionId: new UniqueEntityID('question-1') }),
+        makeQuestionComment({ questionId: new UniqueEntityID('question-1') }),
       )
 
       const spyFindManyByQuestionId = vi.spyOn(
@@ -60,12 +60,12 @@ describe('Fetch Question Answers Use Case', () => {
         'findManyByQuestionId',
       )
 
-      const { answers } = await sut.execute({
+      const { questionComments } = await sut.execute({
         page: 1,
         questionId: 'question-1',
       })
 
-      expect(answers).toEqual([
+      expect(questionComments).toEqual([
         expect.objectContaining({
           questionId: new UniqueEntityID('question-1'),
         }),
@@ -77,15 +77,15 @@ describe('Fetch Question Answers Use Case', () => {
         }),
       ])
 
-      expect(answers).toHaveLength(3)
+      expect(questionComments).toHaveLength(3)
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })
 
-    it('should be able to fetch paginated question`s answers', async () => {
+    it('should be able to fetch paginated question`s questionComments', async () => {
       for (let index = 1; index <= 22; index++) {
         await inMemoryRepository.create(
-          makeAnswer({ questionId: new UniqueEntityID('question-1') }),
+          makeQuestionComment({ questionId: new UniqueEntityID('question-1') }),
         )
       }
       const spyFindManyByQuestionId = vi.spyOn(
@@ -93,12 +93,12 @@ describe('Fetch Question Answers Use Case', () => {
         'findManyByQuestionId',
       )
 
-      const { answers } = await sut.execute({
+      const { questionComments } = await sut.execute({
         page: 2,
         questionId: 'question-1',
       })
 
-      expect(answers).toEqual([
+      expect(questionComments).toEqual([
         expect.objectContaining({
           questionId: new UniqueEntityID('question-1'),
         }),
@@ -107,7 +107,7 @@ describe('Fetch Question Answers Use Case', () => {
         }),
       ])
 
-      expect(answers).toHaveLength(2)
+      expect(questionComments).toHaveLength(2)
 
       expect(spyFindManyByQuestionId).toBeCalled()
     })
