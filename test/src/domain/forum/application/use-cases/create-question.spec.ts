@@ -1,5 +1,6 @@
 import { fakeQuestionsRepository } from '$/repositories/fake-repositories/fake-questions-repository'
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { CreateQuestionUseCase } from '@/domain/forum/application/use-cases/create-question'
 
 let sut: CreateQuestionUseCase
@@ -19,6 +20,7 @@ describe('Create Question Use Case', () => {
         authorId: '1',
         title: 'Nova pergunta',
         content: 'Conteúdo da nova pergunta',
+        attachementsIds: ['1', '2'],
       })
 
       expect(response.isRight()).toBeTruthy()
@@ -48,6 +50,7 @@ describe('Create Question Use Case', () => {
         authorId: '1',
         title: 'Nova pergunta',
         content: 'Conteúdo da nova pergunta',
+        attachementsIds: ['1', '2'],
       })
 
       expect(response.isRight()).toBeTruthy()
@@ -62,6 +65,12 @@ describe('Create Question Use Case', () => {
       expect(inMemoryRepository.items[0].id).toEqual(
         response.value?.question.id,
       )
+
+      expect(inMemoryRepository.items[0].attachments).toHaveLength(2)
+      expect(inMemoryRepository.items[0].attachments).toEqual([
+        expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
+      ])
 
       expect(spyCreate).toBeCalled()
 
