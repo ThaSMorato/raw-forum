@@ -5,7 +5,7 @@ import { SendNotificationUseCase } from '@/domain/notification/application/use-c
 let sut: SendNotificationUseCase
 let inMemoryRepository: InMemoryNotificationsRepository
 
-describe('Create Question Use Case', () => {
+describe('Send Notification Use Case', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -14,7 +14,7 @@ describe('Create Question Use Case', () => {
     beforeEach(() => {
       sut = new SendNotificationUseCase(fakeNotificationsRepository)
     })
-    it('should be able to create a question', async () => {
+    it('should be able to send a notification', async () => {
       const response = await sut.execute({
         recipientId: '1',
         title: 'Nova pergunta',
@@ -42,7 +42,7 @@ describe('Create Question Use Case', () => {
       sut = new SendNotificationUseCase(inMemoryRepository)
     })
 
-    it('should be able to create a notification', async () => {
+    it('should be able to send a notification', async () => {
       const spyCreate = vi.spyOn(inMemoryRepository, 'create')
 
       const response = await sut.execute({
