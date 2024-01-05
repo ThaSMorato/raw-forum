@@ -2,9 +2,11 @@ import { QuestionAttachmentsRepository } from '@/domain/forum/application/reposi
 import { vi } from 'vitest'
 
 const findManyByQuestionId = vi.fn()
+const deleteManyByQuestionId = vi.fn()
 
 export const functions = {
   findManyByQuestionId,
+  deleteManyByQuestionId,
 }
 
 export const fakeQuestionAttachmentsRepository: QuestionAttachmentsRepository =

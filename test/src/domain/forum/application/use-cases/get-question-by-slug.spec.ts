@@ -1,3 +1,4 @@
+import { makeInMemoryQuestionRepository } from '$/factories/make-in-memory-question-repository'
 import { makeQuestion } from '$/factories/make-question'
 import {
   fakeQuestionsRepository,
@@ -60,7 +61,7 @@ describe('Get Question By Slug Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryQuestionsRepository()
+      inMemoryRepository = makeInMemoryQuestionRepository()
       sut = new GetQuestionBySlugUseCase(inMemoryRepository)
     })
 

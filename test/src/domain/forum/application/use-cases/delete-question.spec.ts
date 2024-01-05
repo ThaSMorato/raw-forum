@@ -1,8 +1,10 @@
+import { makeInMemoryQuestionRepository } from '$/factories/make-in-memory-question-repository'
 import { makeQuestion } from '$/factories/make-question'
 import {
   fakeQuestionsRepository,
   functions,
 } from '$/repositories/fake-repositories/fake-questions-repository'
+import { InMemoryQuestionAttachmentsRepository } from '$/repositories/in-memory/in-memory-question-attachments-repository'
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
 import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
@@ -12,6 +14,7 @@ import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/erro
 
 let sut: DeleteQuestionUseCase
 let inMemoryRepository: InMemoryQuestionsRepository
+let inMemoryAttachmentsRepository: InMemoryQuestionAttachmentsRepository
 
 const newQuestion = makeQuestion(
   {
@@ -68,7 +71,11 @@ describe('Delete Question Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryQuestionsRepository()
+      inMemoryAttachmentsRepository =
+        new InMemoryQuestionAttachmentsRepository()
+      inMemoryRepository = makeInMemoryQuestionRepository(
+        inMemoryAttachmentsRepository,
+      )
       sut = new DeleteQuestionUseCase(inMemoryRepository)
     })
 

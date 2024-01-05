@@ -1,3 +1,4 @@
+import { makeInMemoryQuestionRepository } from '$/factories/make-in-memory-question-repository'
 import { fakeQuestionsRepository } from '$/repositories/fake-repositories/fake-questions-repository'
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
@@ -39,7 +40,7 @@ describe('Create Question Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryQuestionsRepository()
+      inMemoryRepository = makeInMemoryQuestionRepository()
       sut = new CreateQuestionUseCase(inMemoryRepository)
     })
 

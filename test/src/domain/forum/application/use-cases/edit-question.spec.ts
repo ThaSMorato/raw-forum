@@ -1,3 +1,4 @@
+import { makeInMemoryQuestionRepository } from '$/factories/make-in-memory-question-repository'
 import { makeQuestion } from '$/factories/make-question'
 import { makeQuestionAttachment } from '$/factories/make-question-attachment'
 import {
@@ -88,7 +89,7 @@ describe('Edit Question Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryQuestionsRepository()
+      inMemoryRepository = makeInMemoryQuestionRepository()
       inMemoryAttachmentsRepository =
         new InMemoryQuestionAttachmentsRepository()
       sut = new EditQuestionUseCase(

@@ -1,3 +1,4 @@
+import { makeInMemoryQuestionRepository } from '$/factories/make-in-memory-question-repository'
 import { makeQuestion } from '$/factories/make-question'
 import {
   fakeQuestionCommentsRepository,
@@ -69,7 +70,7 @@ describe('Comment on Question Use Case', () => {
     beforeEach(() => {
       inMemoryQuestionCommentsRepository =
         new InMemoryQuestionCommentsRepository()
-      inMemoryQuestionsRepository = new InMemoryQuestionsRepository()
+      inMemoryQuestionsRepository = makeInMemoryQuestionRepository()
       sut = new CommentOnQuestionUseCase(
         inMemoryQuestionsRepository,
         inMemoryQuestionCommentsRepository,
