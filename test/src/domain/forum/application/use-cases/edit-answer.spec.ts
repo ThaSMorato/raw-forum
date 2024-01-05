@@ -1,8 +1,12 @@
 import { makeAnswer } from '$/factories/make-answer'
+import { makeAnswerAttachment } from '$/factories/make-answer-attachment'
+import { makeInMemoryAnswerRepository } from '$/factories/make-in-memory-answer-repository'
+import { fakeAnswerAttachmentsRepository } from '$/repositories/fake-repositories/fake-answer-attachments-repository'
 import {
   fakeAnswersRepository,
   functions,
 } from '$/repositories/fake-repositories/fake-answers-repository'
+import { InMemoryAnswerAttachmentsRepository } from '$/repositories/in-memory/in-memory-answer-attachments-repository'
 import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
 import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
@@ -11,6 +15,7 @@ import { NotAllowedError } from '@/domain/forum/application/use-cases/errors/not
 import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: EditAnswerUseCase
+let inMemoryAttachmentsRepository: InMemoryAnswerAttachmentsRepository
 let inMemoryRepository: InMemoryAnswersRepository
 
 const newAnswer = makeAnswer(
@@ -27,7 +32,10 @@ describe('Edit Answer Use Case', () => {
 
   describe('Unity tests', () => {
     beforeEach(() => {
-      sut = new EditAnswerUseCase(fakeAnswersRepository)
+      sut = new EditAnswerUseCase(
+        fakeAnswersRepository,
+        fakeAnswerAttachmentsRepository,
+      )
     })
     it('should be able to Edit a answer', async () => {
       functions.findById.mockResolvedValue(newAnswer)
@@ -36,6 +44,7 @@ describe('Edit Answer Use Case', () => {
         answerId: 'answer-1',
         authorId: 'author-1',
         content: 'new content',
+        attachmentsIds: [],
       })
 
       expect(functions.findById).toBeCalled()
@@ -48,6 +57,7 @@ describe('Edit Answer Use Case', () => {
         answerId: 'answer-1',
         authorId: 'author-2',
         content: 'new content',
+        attachmentsIds: [],
       })
       expect(response).toBeInstanceOf(Left)
       expect(response.isLeft()).toBeTruthy()
@@ -60,6 +70,7 @@ describe('Edit Answer Use Case', () => {
         answerId: 'a-not-valid-id',
         authorId: 'author-1',
         content: 'new content',
+        attachmentsIds: [],
       })
       expect(response).toBeInstanceOf(Left)
       expect(response.isLeft()).toBeTruthy()
@@ -69,12 +80,27 @@ describe('Edit Answer Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryAnswersRepository()
-      sut = new EditAnswerUseCase(inMemoryRepository)
+      inMemoryRepository = makeInMemoryAnswerRepository()
+      inMemoryAttachmentsRepository = new InMemoryAnswerAttachmentsRepository()
+      sut = new EditAnswerUseCase(
+        inMemoryRepository,
+        inMemoryAttachmentsRepository,
+      )
     })
 
     it('should be able to Edit a answer', async () => {
       await inMemoryRepository.create(newAnswer)
+
+      inMemoryAttachmentsRepository.items.push(
+        makeAnswerAttachment({
+          answerId: newAnswer.id,
+          attachmentId: new UniqueEntityID('1'),
+        }),
+        makeAnswerAttachment({
+          answerId: newAnswer.id,
+          attachmentId: new UniqueEntityID('2'),
+        }),
+      )
 
       const spyFindById = vi.spyOn(inMemoryRepository, 'findById')
       const spyEdit = vi.spyOn(inMemoryRepository, 'save')
@@ -83,6 +109,7 @@ describe('Edit Answer Use Case', () => {
         answerId: 'answer-1',
         authorId: 'author-1',
         content: 'new content',
+        attachmentsIds: ['1', '3'],
       })
 
       expect(spyFindById).toBeCalled()
@@ -91,6 +118,13 @@ describe('Edit Answer Use Case', () => {
       expect(inMemoryRepository.items[0]).toMatchObject({
         content: 'new content',
       })
+      expect(inMemoryRepository.items[0].attachments.currentItems).toHaveLength(
+        2,
+      )
+      expect(inMemoryRepository.items[0].attachments.currentItems).toEqual([
+        expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityID('3') }),
+      ])
     })
     it('should throw if receives a not valid author id', async () => {
       await inMemoryRepository.create(newAnswer)
@@ -101,6 +135,7 @@ describe('Edit Answer Use Case', () => {
         answerId: 'answer-1',
         authorId: 'author-2',
         content: 'new content',
+        attachmentsIds: [],
       })
       expect(response).toBeInstanceOf(Left)
       expect(response.isLeft()).toBeTruthy()
@@ -114,6 +149,7 @@ describe('Edit Answer Use Case', () => {
         answerId: 'a-not-valid-id',
         authorId: 'author-1',
         content: 'new content',
+        attachmentsIds: [],
       })
       expect(response).toBeInstanceOf(Left)
       expect(response.isLeft()).toBeTruthy()

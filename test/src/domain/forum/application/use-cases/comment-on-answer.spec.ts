@@ -1,4 +1,5 @@
 import { makeAnswer } from '$/factories/make-answer'
+import { makeInMemoryAnswerRepository } from '$/factories/make-in-memory-answer-repository'
 import {
   fakeAnswerCommentsRepository,
   functions as commentFunctions,
@@ -70,7 +71,7 @@ describe('Comment on Answer Use Case', () => {
   describe('Integration tests', () => {
     beforeEach(() => {
       inMemoryAnswerCommentsRepository = new InMemoryAnswerCommentsRepository()
-      inMemoryAnswersRepository = new InMemoryAnswersRepository()
+      inMemoryAnswersRepository = makeInMemoryAnswerRepository()
       sut = new CommentOnAnswerUseCase(
         inMemoryAnswersRepository,
         inMemoryAnswerCommentsRepository,

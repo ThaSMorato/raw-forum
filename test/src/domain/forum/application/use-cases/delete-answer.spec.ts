@@ -1,8 +1,11 @@
 import { makeAnswer } from '$/factories/make-answer'
+import { makeAnswerAttachment } from '$/factories/make-answer-attachment'
+import { makeInMemoryAnswerRepository } from '$/factories/make-in-memory-answer-repository'
 import {
   fakeAnswersRepository,
   functions,
 } from '$/repositories/fake-repositories/fake-answers-repository'
+import { InMemoryAnswerAttachmentsRepository } from '$/repositories/in-memory/in-memory-answer-attachments-repository'
 import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
 import { Left } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
@@ -11,6 +14,7 @@ import { NotAllowedError } from '@/domain/forum/application/use-cases/errors/not
 import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
 
 let sut: DeleteAnswerUseCase
+let inMemoryAttachmentsRepository: InMemoryAnswerAttachmentsRepository
 let inMemoryRepository: InMemoryAnswersRepository
 
 const newAnswer = makeAnswer(
@@ -68,15 +72,33 @@ describe('Delete Answer Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryAnswersRepository()
+      inMemoryAttachmentsRepository = new InMemoryAnswerAttachmentsRepository()
+      inMemoryRepository = makeInMemoryAnswerRepository(
+        inMemoryAttachmentsRepository,
+      )
       sut = new DeleteAnswerUseCase(inMemoryRepository)
     })
 
     it('should be able to delete a answer', async () => {
       await inMemoryRepository.create(newAnswer)
 
+      inMemoryAttachmentsRepository.items.push(
+        makeAnswerAttachment({
+          answerId: newAnswer.id,
+          attachmentId: new UniqueEntityID('1'),
+        }),
+        makeAnswerAttachment({
+          answerId: newAnswer.id,
+          attachmentId: new UniqueEntityID('2'),
+        }),
+      )
+
       const spyFindById = vi.spyOn(inMemoryRepository, 'findById')
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
+      const spyDeleteMany = vi.spyOn(
+        inMemoryAttachmentsRepository,
+        'deleteManyByAnswerId',
+      )
 
       await sut.execute({
         answerId: 'answer-1',
@@ -85,7 +107,9 @@ describe('Delete Answer Use Case', () => {
 
       expect(spyFindById).toBeCalled()
       expect(spyDelete).toBeCalled()
+      expect(spyDeleteMany).toBeCalled()
       expect(inMemoryRepository.items.length).toBe(0)
+      expect(inMemoryAttachmentsRepository.items.length).toBe(0)
     })
     it('should throw if receives a not valid author id', async () => {
       await inMemoryRepository.create(newAnswer)

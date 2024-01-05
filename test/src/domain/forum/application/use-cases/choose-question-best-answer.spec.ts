@@ -1,4 +1,5 @@
 import { makeAnswer } from '$/factories/make-answer'
+import { makeInMemoryAnswerRepository } from '$/factories/make-in-memory-answer-repository'
 import { makeInMemoryQuestionRepository } from '$/factories/make-in-memory-question-repository'
 import { makeQuestion } from '$/factories/make-question'
 import {
@@ -94,7 +95,7 @@ describe('Chose Question Best Answer Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryAnswersRepository = new InMemoryAnswersRepository()
+      inMemoryAnswersRepository = makeInMemoryAnswerRepository()
       inMemoryQuestionsRepository = makeInMemoryQuestionRepository()
       sut = new ChooseQuestionBestAnswerUseCase(
         inMemoryAnswersRepository,

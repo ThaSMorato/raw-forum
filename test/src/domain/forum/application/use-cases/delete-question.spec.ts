@@ -1,5 +1,6 @@
 import { makeInMemoryQuestionRepository } from '$/factories/make-in-memory-question-repository'
 import { makeQuestion } from '$/factories/make-question'
+import { makeQuestionAttachment } from '$/factories/make-question-attachment'
 import {
   fakeQuestionsRepository,
   functions,
@@ -82,8 +83,23 @@ describe('Delete Question Use Case', () => {
     it('should be able to delete a question', async () => {
       await inMemoryRepository.create(newQuestion)
 
+      inMemoryAttachmentsRepository.items.push(
+        makeQuestionAttachment({
+          questionId: newQuestion.id,
+          attachmentId: new UniqueEntityID('1'),
+        }),
+        makeQuestionAttachment({
+          questionId: newQuestion.id,
+          attachmentId: new UniqueEntityID('2'),
+        }),
+      )
+
       const spyFindById = vi.spyOn(inMemoryRepository, 'findById')
       const spyDelete = vi.spyOn(inMemoryRepository, 'delete')
+      const spyDeleteMany = vi.spyOn(
+        inMemoryAttachmentsRepository,
+        'deleteManyByQuestionId',
+      )
 
       await sut.execute({
         questionId: 'question-1',
@@ -92,7 +108,9 @@ describe('Delete Question Use Case', () => {
 
       expect(spyFindById).toBeCalled()
       expect(spyDelete).toBeCalled()
+      expect(spyDeleteMany).toBeCalled()
       expect(inMemoryRepository.items.length).toBe(0)
+      expect(inMemoryAttachmentsRepository.items.length).toBe(0)
     })
     it('should throw if receives a not valid author id', async () => {
       await inMemoryRepository.create(newQuestion)

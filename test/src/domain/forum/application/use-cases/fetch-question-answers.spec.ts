@@ -1,4 +1,5 @@
 import { makeAnswer } from '$/factories/make-answer'
+import { makeInMemoryAnswerRepository } from '$/factories/make-in-memory-answer-repository'
 import {
   fakeAnswersRepository,
   functions,
@@ -43,7 +44,7 @@ describe('Fetch Question Answers Use Case', () => {
 
   describe('Integration tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryAnswersRepository()
+      inMemoryRepository = makeInMemoryAnswerRepository()
       sut = new FetchQuestionAnswersUseCase(inMemoryRepository)
     })
 

@@ -1,5 +1,7 @@
+import { makeInMemoryAnswerRepository } from '$/factories/make-in-memory-answer-repository'
 import { fakeAnswersRepository } from '$/repositories/fake-repositories/fake-answers-repository'
 import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { AnswerQuestionUseCase } from '@/domain/forum/application/use-cases/answer-question'
 
 let sut: AnswerQuestionUseCase
@@ -20,6 +22,7 @@ describe('Answer Question Use Case', () => {
         content: 'Nova Resposta',
         instructorId: '1',
         questionId: '1',
+        attachmentsIds: [],
       })
 
       expect(result.isRight()).toBeTruthy()
@@ -34,7 +37,7 @@ describe('Answer Question Use Case', () => {
 
   describe('Integration Tests', () => {
     beforeEach(() => {
-      inMemoryRepository = new InMemoryAnswersRepository()
+      inMemoryRepository = makeInMemoryAnswerRepository()
       sut = new AnswerQuestionUseCase(inMemoryRepository)
     })
     it('should be able to answer a question', async () => {
@@ -44,6 +47,7 @@ describe('Answer Question Use Case', () => {
         content: 'Nova Resposta',
         instructorId: '1',
         questionId: '1',
+        attachmentsIds: ['1', '2'],
       })
 
       expect(result.isRight()).toBeTruthy()
@@ -55,6 +59,14 @@ describe('Answer Question Use Case', () => {
       expect(spyCreate).toBeCalled()
 
       expect(inMemoryRepository.items.length).toEqual(1)
+
+      expect(inMemoryRepository.items[0].attachments.currentItems).toHaveLength(
+        2,
+      )
+      expect(inMemoryRepository.items[0].attachments.currentItems).toEqual([
+        expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
+      ])
     })
   })
 })
