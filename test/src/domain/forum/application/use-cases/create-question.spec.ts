@@ -20,7 +20,7 @@ describe('Create Question Use Case', () => {
         authorId: '1',
         title: 'Nova pergunta',
         content: 'Conteúdo da nova pergunta',
-        attachementsIds: ['1', '2'],
+        attachmentsIds: ['1', '2'],
       })
 
       expect(response.isRight()).toBeTruthy()
@@ -50,7 +50,7 @@ describe('Create Question Use Case', () => {
         authorId: '1',
         title: 'Nova pergunta',
         content: 'Conteúdo da nova pergunta',
-        attachementsIds: ['1', '2'],
+        attachmentsIds: ['1', '2'],
       })
 
       expect(response.isRight()).toBeTruthy()
