@@ -12,7 +12,7 @@ import { InMemoryAnswerCommentsRepository } from '$/repositories/in-memory/in-me
 import { InMemoryAnswersRepository } from '$/repositories/in-memory/in-memory-answers-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { CommentOnAnswerUseCase } from '@/domain/forum/application/use-cases/comment-on-answer'
-import { ResourceNotFoundError } from '@/domain/forum/application/use-cases/errors/resource-not-found-error'
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
 
 let sut: CommentOnAnswerUseCase
 let inMemoryAnswerCommentsRepository: InMemoryAnswerCommentsRepository
