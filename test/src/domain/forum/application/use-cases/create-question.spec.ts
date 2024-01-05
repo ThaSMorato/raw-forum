@@ -66,8 +66,10 @@ describe('Create Question Use Case', () => {
         response.value?.question.id,
       )
 
-      expect(inMemoryRepository.items[0].attachments).toHaveLength(2)
-      expect(inMemoryRepository.items[0].attachments).toEqual([
+      expect(inMemoryRepository.items[0].attachments.currentItems).toHaveLength(
+        2,
+      )
+      expect(inMemoryRepository.items[0].attachments.currentItems).toEqual([
         expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
         expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
       ])
