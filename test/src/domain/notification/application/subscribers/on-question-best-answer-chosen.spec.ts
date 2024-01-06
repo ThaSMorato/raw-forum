@@ -7,8 +7,8 @@ import { InMemoryNotificationsRepository } from '$/repositories/in-memory/in-mem
 import { InMemoryQuestionsRepository } from '$/repositories/in-memory/in-memory-questions-repository'
 import { waitFor } from '$/utils/wait-for'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { Question } from '@/domain/forum/enterprise/entities/question'
-import { OnAnswerCreated } from '@/domain/notification/application/subscribers/on-answer-created'
+import { Answer } from '@/domain/forum/enterprise/entities/answer'
+import { OnQuestionBestAnswerChosen } from '@/domain/notification/application/subscribers/on-question-best-answer-chosen'
 import {
   SendNotificationUseCase,
   SendNotificationUseCaseRequest,
@@ -22,14 +22,14 @@ let inMemoryQuestionsRepository: InMemoryQuestionsRepository
 let sendNotificationUseCase: SendNotificationUseCase
 let inMemoryNotificationsRepository: InMemoryNotificationsRepository
 
-let spyFindById: MockInstance<[string], Promise<Question | null>>
+let spyFindById: MockInstance<[string], Promise<Answer | null>>
 let spyExecute: MockInstance<
   [SendNotificationUseCaseRequest],
   Promise<SendNotificationUseCaseResponse>
 >
 let spyCreate: MockInstance<[notification: Notification], Promise<void>>
 
-describe('On Answer Created Subscribe', () => {
+describe('On Question Best Answer Chosen Subscribe', () => {
   beforeEach(() => {
     inMemoryNotificationsRepository = new InMemoryNotificationsRepository()
     sendNotificationUseCase = new SendNotificationUseCase(
@@ -38,19 +38,22 @@ describe('On Answer Created Subscribe', () => {
     inMemoryQuestionsRepository = makeInMemoryQuestionRepository()
     inMemoryAnswersRepository = makeInMemoryAnswerRepository()
 
-    spyFindById = vi.spyOn(inMemoryQuestionsRepository, 'findById')
+    spyFindById = vi.spyOn(inMemoryAnswersRepository, 'findById')
     spyExecute = vi.spyOn(sendNotificationUseCase, 'execute')
     spyCreate = vi.spyOn(inMemoryNotificationsRepository, 'create')
 
     // eslint-disable-next-line no-new
-    new OnAnswerCreated(inMemoryQuestionsRepository, sendNotificationUseCase)
+    new OnQuestionBestAnswerChosen(
+      inMemoryAnswersRepository,
+      sendNotificationUseCase,
+    )
   })
 
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('should send a notification when an answer is created', async () => {
+  it('should send a notification when question has a new best answer', async () => {
     const newQuestion = makeQuestion()
     const answer = makeAnswer({
       questionId: newQuestion.id,
@@ -60,6 +63,10 @@ describe('On Answer Created Subscribe', () => {
 
     inMemoryAnswersRepository.create(answer)
 
+    newQuestion.bestAnswerId = answer.id
+
+    inMemoryQuestionsRepository.save(newQuestion)
+
     await waitFor(() => {
       expect(spyFindById).toHaveBeenCalled()
       expect(spyExecute).toHaveBeenCalled()
@@ -67,15 +74,19 @@ describe('On Answer Created Subscribe', () => {
     })
   })
 
-  it('should not send a notification when an answer is created to another question', async () => {
+  it('should not send a notification when another question gets a best answer', async () => {
     const newQuestion = makeQuestion()
     const answer = makeAnswer({
-      questionId: new UniqueEntityID(`not_${newQuestion.id}`),
+      questionId: newQuestion.id,
     })
 
     inMemoryQuestionsRepository.create(newQuestion)
 
     inMemoryAnswersRepository.create(answer)
+
+    newQuestion.bestAnswerId = new UniqueEntityID(`not_${answer.id}`)
+
+    inMemoryQuestionsRepository.save(newQuestion)
 
     await waitFor(() => {
       expect(spyFindById).toHaveBeenCalled()
